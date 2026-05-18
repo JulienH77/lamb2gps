@@ -101,7 +101,25 @@ button:hover {
 .link:hover {
   text-decoration: underline;
 }
+.map-button {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #111827;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+}
 
+.map-button:hover {
+  background: #f9fafb;
+}
+
+  
 /* Mobile */
 @media (max-width: 480px) {
   .wrapper {
@@ -153,13 +171,20 @@ function convert() {
   const lat = result[1];
 
   const link = `https://www.google.com/maps?q=${lat},${lon}`;
+  
+const output = `
+  <div><strong>Latitude :</strong> ${lat.toFixed(6)}</div>
+  <div><strong>Longitude :</strong> ${lon.toFixed(6)}</div>
+  <button class="map-button" onclick="openMap('${lat}', '${lon}')">
+    Ouvrir dans Google Maps
+  </button>
+`;
 
-  const output = `
-    <div><strong>Latitude :</strong> ${lat.toFixed(6)}</div>
-    <div><strong>Longitude :</strong> ${lon.toFixed(6)}</div>
-    <a class="link" href="${link}" target="_blank">Ouvrir dans Google Maps</a>
-  `;
-
+function openMap(lat, lon) {
+  const url = `https://www.google.com/maps?q=${lat},${lon}`;
+  window.open(url, "_blank");
+}
+  
   const res = document.getElementById("result");
   res.style.display = "block";
   res.innerHTML = output;
