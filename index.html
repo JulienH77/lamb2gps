@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Conversion Lambert93 → GPS</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
+</head>
+<body>
+
+<h2>Convertisseur Lambert 93 → GPS</h2>
+
+X : <input id="x" type="number"><br>
+Y : <input id="y" type="number"><br><br>
+
+<button onclick="convert()">Convertir</button>
+
+<p id="result"></p>
+
+<script>
+function convert() {
+  const x = parseFloat(document.getElementById("x").value);
+  const y = parseFloat(document.getElementById("y").value);
+
+  proj4.defs("EPSG:2154","+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs");
+
+  const result = proj4("EPSG:2154","EPSG:4326",[x,y]);
+
+  const lon = result[0];
+  const lat = result[1];
+
+  const googleLink = `https://www.google.com/maps?q=${lat},${lon}`;
+
+  document.getElementById("result").innerHTML =
+    `Latitude : ${lat.toFixed(6)}<br>
+     Longitude : ${lon.toFixed(6)}<br>
+     <a href="${googleLink}" target="_blank">Voir sur Google Maps</a>`;
+}
+</script>
+
+</body>
+</html>
