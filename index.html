@@ -164,7 +164,11 @@ function convert() {
     alert("Coordonnées invalides");
     return;
   }
-
+function openMap(lat, lon) {
+  const url = `https://www.google.com/maps?q=${lat},${lon}`;
+  window.open(url, "_blank");
+}
+  
   const result = proj4("EPSG:2154", "EPSG:4326", [x, y]);
 
   const lon = result[0];
@@ -179,11 +183,6 @@ const output = `
     Ouvrir dans Google Maps
   </button>
 `;
-
-function openMap(lat, lon) {
-  const url = `https://www.google.com/maps?q=${lat},${lon}`;
-  window.open(url, "_blank");
-}
   
   const res = document.getElementById("result");
   res.style.display = "block";
