@@ -3,194 +3,508 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Lambert 93 → WGS84</title>
-
+<title>Coordonnées GPS</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
-
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-* {
-  box-sizing: border-box;
+:root {
+  --bg: #f0f2f5;
+  --card: #ffffff;
+  --border: #e2e5ea;
+  --text: #0f1923;
+  --muted: #7a8394;
+  --accent: #0057ff;
+  --accent-light: #eff4ff;
+  --tab-active-bg: #0f1923;
+  --tab-active-fg: #ffffff;
+  --mono: 'DM Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+  --radius: 14px;
+  --radius-sm: 8px;
 }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  margin: 0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  background: #f3f4f6;
-  color: #111827;
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 32px 16px 48px;
 }
 
+/* ─── WRAPPER ─── */
 .wrapper {
-  max-width: 420px;
-  margin: 60px auto;
-  padding: 0 16px;
+  max-width: 400px;
+  margin: 0 auto;
 }
 
-.card {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 24px;
-  border: 1px solid #e5e7eb;
+/* ─── HEADER ─── */
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 0 4px;
 }
-
-h1 {
-  font-size: 18px;
-  margin: 0 0 20px 0;
+.app-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--text);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.app-icon svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.app-title {
+  font-size: 15px;
   font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.app-subtitle {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 1px;
 }
 
-.field {
+/* ─── TABS ─── */
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--border);
+  border-radius: var(--radius);
+  padding: 3px;
   margin-bottom: 16px;
+  gap: 2px;
 }
-
-label {
-  display: block;
-  font-size: 13px;
-  margin-bottom: 6px;
-  color: #6b7280;
-}
-
-input {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 15px;
-  background: #fff;
-}
-
-input:focus {
-  outline: none;
-  border-color: #2563eb;
-}
-
-button {
-  width: 100%;
-  padding: 12px;
-  border-radius: 8px;
+.tab {
+  padding: 10px 8px;
+  border-radius: calc(var(--radius) - 3px);
   border: none;
-  background: #111827;
-  color: white;
-  font-size: 15px;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-}
-
-button:hover {
-  background: #1f2937;
-}
-
-.result {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
-  font-size: 14px;
-}
-
-.result strong {
-  font-weight: 600;
-}
-
-.link {
-  display: inline-block;
-  margin-top: 10px;
-  color: #2563eb;
-  text-decoration: none;
-}
-
-.link:hover {
-  text-decoration: underline;
-}
-.map-button {
-  display: block;
-  width: 100%;
-  margin-top: 12px;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  background: #ffffff;
-  color: #111827;
-  font-size: 14px;
-  cursor: pointer;
+  transition: all 0.18s ease;
   text-align: center;
+  line-height: 1.3;
+}
+.tab.active {
+  background: var(--tab-active-bg);
+  color: var(--tab-active-fg);
+}
+.tab span {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  opacity: 0.65;
+  margin-top: 2px;
+}
+.tab.active span { opacity: 0.6; }
+
+/* ─── CARD ─── */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 20px;
+  animation: fadeIn 0.18s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.map-button:hover {
-  background: #f9fafb;
+/* ─── PANE ─── */
+.pane { display: none; }
+.pane.active { display: block; }
+
+/* ─── SECTION LABEL ─── */
+.section-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
 }
 
-  
-/* Mobile */
-@media (max-width: 480px) {
-  .wrapper {
-    margin: 30px auto;
-  }
+/* ─── FIELD ─── */
+.field { margin-bottom: 12px; }
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+input {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-family: var(--mono);
+  background: #fafbfc;
+  color: var(--text);
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+}
+input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+input::placeholder {
+  color: #c5cad3;
+}
+
+/* ─── BUTTON ─── */
+.btn-primary {
+  width: 100%;
+  padding: 13px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--text);
+  color: white;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  margin-top: 4px;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.btn-primary:hover   { opacity: 0.88; }
+.btn-primary:active  { transform: scale(0.985); }
+
+/* ─── DIVIDER ─── */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 18px 0;
+}
+
+/* ─── RESULT ─── */
+.result { display: none; }
+
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f2f5;
+}
+.result-row:last-of-type { border-bottom: none; }
+.result-key {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 500;
+}
+.result-val {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+/* copy button */
+.btn-copy {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-family: var(--sans);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-left: 8px;
+  white-space: nowrap;
+}
+.btn-copy:hover { border-color: var(--accent); color: var(--accent); }
+.btn-copy.copied { border-color: #16a34a; color: #16a34a; }
+
+/* ─── MAP BUTTONS ─── */
+.map-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+.btn-map {
+  padding: 11px 8px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: #fff;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s;
+  color: var(--text);
+}
+.btn-map:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+.btn-map svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+/* ─── ERROR ─── */
+.error-msg {
+  display: none;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #be123c;
+  font-size: 13px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  margin-top: 10px;
+}
+
+/* ─── GPS LINK ─── */
+.gps-link-box {
+  display: none;
+  margin-top: 0;
+}
+.gps-link-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent-light);
+  border: 1.5px solid #bfdbfe;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+.gps-link-text {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent);
+  word-break: break-all;
+  flex: 1;
+  line-height: 1.5;
+}
+
+/* ─── MOBILE TWEAKS ─── */
+@media (max-width: 380px) {
+  body { padding: 20px 12px 40px; }
+  .map-actions { grid-template-columns: 1fr; }
 }
 </style>
 </head>
-
 <body>
-
 <div class="wrapper">
+
+  <!-- Header -->
+  <div class="app-header">
+    <div class="app-icon">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="11" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+    </div>
+    <div>
+      <div class="app-title">Coordonnées GPS</div>
+      <div class="app-subtitle">Conversion &amp; liens cartographiques</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('lambert')" id="tab-lambert">
+      Lambert 93 → GPS
+      <span>EPSG:2154 → 4326</span>
+    </button>
+    <button class="tab" onclick="switchTab('gps')" id="tab-gps">
+      GPS → Carte
+      <span>lat / lon</span>
+    </button>
+  </div>
+
+  <!-- Card -->
   <div class="card">
-    <h1>Lambert 93 → WGS84</h1>
 
-    <div class="field">
-      <label for="x">X (Lambert 93)</label>
-      <input id="x" type="number" inputmode="decimal">
+    <!-- ════ PANE 1 : Lambert 93 → WGS84 ════ -->
+    <div class="pane active" id="pane-lambert">
+      <div class="section-label">Coordonnées Lambert 93</div>
+      <div class="field">
+        <label for="x">X (Est)</label>
+        <input id="x" type="number" inputmode="decimal" placeholder="ex. 859815">
+      </div>
+      <div class="field">
+        <label for="y">Y (Nord)</label>
+        <input id="y" type="number" inputmode="decimal" placeholder="ex. 6782245">
+      </div>
+      <button class="btn-primary" onclick="convertLambert()">Convertir →</button>
+      <div class="error-msg" id="err-lambert">Veuillez saisir des coordonnées valides.</div>
+
+      <div class="result" id="result-lambert">
+        <div class="divider"></div>
+        <div class="section-label">Résultat WGS84</div>
+        <div class="result-row">
+          <span class="result-key">Latitude</span>
+          <span style="display:flex;align-items:center;">
+            <span class="result-val" id="out-lat">—</span>
+            <button class="btn-copy" onclick="copyVal('out-lat', this)">Copier</button>
+          </span>
+        </div>
+        <div class="result-row">
+          <span class="result-key">Longitude</span>
+          <span style="display:flex;align-items:center;">
+            <span class="result-val" id="out-lon">—</span>
+            <button class="btn-copy" onclick="copyVal('out-lon', this)">Copier</button>
+          </span>
+        </div>
+        <div class="map-actions">
+          <button class="btn-map" id="btn-gmaps-lambert" onclick="">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            Google Maps
+          </button>
+          <button class="btn-map" id="btn-osmaps-lambert" onclick="">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+            OpenStreetMap
+          </button>
+        </div>
+      </div>
     </div>
 
-    <div class="field">
-      <label for="y">Y (Lambert 93)</label>
-      <input id="y" type="number" inputmode="decimal">
+    <!-- ════ PANE 2 : GPS → liens ════ -->
+    <div class="pane" id="pane-gps">
+      <div class="section-label">Coordonnées WGS84 (décimales)</div>
+      <div class="field">
+        <label for="gps-lat">Latitude</label>
+        <input id="gps-lat" type="number" inputmode="decimal" placeholder="ex. 48.11472" step="any">
+      </div>
+      <div class="field">
+        <label for="gps-lon">Longitude</label>
+        <input id="gps-lon" type="number" inputmode="decimal" placeholder="ex. 5.14481" step="any">
+      </div>
+      <button class="btn-primary" onclick="generateGPSLink()">Générer les liens</button>
+      <div class="error-msg" id="err-gps">Veuillez saisir des coordonnées valides.</div>
+
+      <div class="gps-link-box" id="gps-link-box">
+        <div class="divider"></div>
+        <div class="section-label">Liens générés</div>
+        <div class="gps-link-wrap">
+          <span class="gps-link-text" id="gps-link-text">—</span>
+          <button class="btn-copy" onclick="copyText(document.getElementById('gps-link-text').textContent, this)">Copier</button>
+        </div>
+        <div class="map-actions">
+          <button class="btn-map" id="btn-gmaps-gps" onclick="">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            Google Maps
+          </button>
+          <button class="btn-map" id="btn-osmaps-gps" onclick="">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+            OpenStreetMap
+          </button>
+        </div>
+      </div>
     </div>
 
-    <button onclick="convert()">Convertir</button>
-
-    <div id="result" class="result" style="display:none;"></div>
   </div>
 </div>
 
 <script>
+// ─── Proj4 ───────────────────────────────────────────────
 proj4.defs("EPSG:2154",
-"+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs"
+  "+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs"
 );
 
-
-function openMap(lat, lon) {
-  const url = `https://www.google.com/maps?q=${lat},${lon}`;
-  window.open(url, "_blank");
+// ─── Tabs ────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('pane-' + name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
 }
-  
-function convert() {
-  const x = parseFloat(document.getElementById("x").value);
-  const y = parseFloat(document.getElementById("y").value);
+
+// ─── Lambert 93 → WGS84 ──────────────────────────────────
+function convertLambert() {
+  const errEl = document.getElementById('err-lambert');
+  const resEl = document.getElementById('result-lambert');
+  const x = parseFloat(document.getElementById('x').value);
+  const y = parseFloat(document.getElementById('y').value);
 
   if (isNaN(x) || isNaN(y)) {
-    alert("Coordonnées invalides");
+    errEl.style.display = 'block';
+    resEl.style.display = 'none';
     return;
   }
-  
-  const result = proj4("EPSG:2154", "EPSG:4326", [x, y]);
+  errEl.style.display = 'none';
 
-  const lon = result[0];
-  const lat = result[1];
+  const [lon, lat] = proj4("EPSG:2154", "EPSG:4326", [x, y]);
+  const latF = lat.toFixed(6);
+  const lonF = lon.toFixed(6);
 
-  const link = `https://www.google.com/maps?q=${lat},${lon}`;
-  
-const output = `
-  <div><strong>Latitude :</strong> ${lat.toFixed(6)}</div>
-  <div><strong>Longitude :</strong> ${lon.toFixed(6)}</div>
-  <button class="map-button" onclick="openMap('${lat}', '${lon}')">
-    Ouvrir dans Google Maps
-  </button>
-`;
-  
-  const res = document.getElementById("result");
-  res.style.display = "block";
-  res.innerHTML = output;
+  document.getElementById('out-lat').textContent = latF;
+  document.getElementById('out-lon').textContent = lonF;
+
+  const gmUrl = `https://www.google.com/maps?q=${latF},${lonF}`;
+  const osmUrl = `https://www.openstreetmap.org/?mlat=${latF}&mlon=${lonF}&zoom=16`;
+
+  document.getElementById('btn-gmaps-lambert').onclick = () => window.open(gmUrl, '_blank');
+  document.getElementById('btn-osmaps-lambert').onclick = () => window.open(osmUrl, '_blank');
+
+  resEl.style.display = 'block';
 }
-</script>
 
+// ─── GPS → liens ─────────────────────────────────────────
+function generateGPSLink() {
+  const errEl  = document.getElementById('err-gps');
+  const boxEl  = document.getElementById('gps-link-box');
+  const lat    = parseFloat(document.getElementById('gps-lat').value);
+  const lon    = parseFloat(document.getElementById('gps-lon').value);
+
+  if (isNaN(lat) || isNaN(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+    errEl.style.display = 'block';
+    boxEl.style.display = 'none';
+    return;
+  }
+  errEl.style.display = 'none';
+
+  const latF = lat.toFixed(6);
+  const lonF = lon.toFixed(6);
+  const gmUrl  = `https://www.google.com/maps?q=${latF},${lonF}`;
+  const osmUrl = `https://www.openstreetmap.org/?mlat=${latF}&mlon=${lonF}&zoom=16`;
+
+  document.getElementById('gps-link-text').textContent = gmUrl;
+  document.getElementById('btn-gmaps-gps').onclick  = () => window.open(gmUrl,  '_blank');
+  document.getElementById('btn-osmaps-gps').onclick = () => window.open(osmUrl, '_blank');
+
+  boxEl.style.display = 'block';
+}
+
+// ─── Copier ───────────────────────────────────────────────
+function copyVal(id, btn) {
+  copyText(document.getElementById(id).textContent, btn);
+}
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copié ✓';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copier'; btn.classList.remove('copied'); }, 1800);
+  });
+}
+
+// ─── Enter key ───────────────────────────────────────────
+document.getElementById('y').addEventListener('keydown', e => { if (e.key === 'Enter') convertLambert(); });
+document.getElementById('gps-lon').addEventListener('keydown', e => { if (e.key === 'Enter') generateGPSLink(); });
+</script>
 </body>
 </html>
